@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('return_money', function (Blueprint $table) {
+Schema::table('returns', function (Blueprint $table) {
     $table->dateTime('expected_date')->nullable()->after('date');
 });
     }
