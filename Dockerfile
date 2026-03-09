@@ -6,46 +6,44 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     zip \
-    sqlite3
+    sqlite3 \
+    libsqlite3-dev
 
 # Install PHP extensions
 RUN docker-php-ext-install zip pdo pdo_sqlite
 
-# Install Composer
+# Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www
 
-# Copy project files
+# Copy project
 COPY . .
 
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Create env file
+# Create environment file
 RUN cp .env.example .env
 
 # Create SQLite database
 RUN mkdir -p database \
  && touch database/database.sqlite
 
-# Set permissions
+# Fix permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Generate app key
+# Generate key
 RUN php artisan key:generate
 
 # Run migrations
 RUN php artisan migrate --force
 
-# Cache config/routes for production
+# Cache configs
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
 
-# Expose port
 EXPOSE 10000
 
-# Start Laravel server
 CMD php artisan serve --host=0.0.0.0 --port=10000
